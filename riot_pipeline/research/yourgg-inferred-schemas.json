@@ -1,0 +1,169 @@
+{
+  "research_date": "2026-06-30",
+  "labels": {
+    "verified": "Observed directly in public response, public HTML, or public JS bundle.",
+    "strong_inference": "Inferred from public route names, client rendering code, and Riot API capabilities.",
+    "weak_inference": "Plausible but not directly confirmed by a populated payload.",
+    "unknown": "Not verified from public passive research."
+  },
+  "schemas": {
+    "augmentGuideResponse": {
+      "status": "verified",
+      "source": "GET https://api.your.gg/{region}/api/augment-guides/aram-mayhem?limit=2",
+      "fields": {
+        "success": {"type": "boolean", "status": "verified"},
+        "statusCode": {"type": "number", "status": "verified"},
+        "response": {
+          "type": "object",
+          "status": "verified",
+          "fields": {
+            "hasMore": {"type": "boolean", "status": "verified"},
+            "items": {"type": "array<augmentGuideItem>", "status": "verified_empty_array"},
+            "patch": {"type": "string", "status": "verified", "example": "16.13"},
+            "nextCursor": {"type": "string", "status": "verified_from_client", "notes": "Read by getNextPageParam when hasMore is true."}
+          }
+        }
+      }
+    },
+    "augmentGuideItem": {
+      "status": "strong_inference",
+      "source": "Augments page chunk rendering code; live endpoint returned no items.",
+      "fields": {
+        "augmentId": {"type": "number", "status": "verified_from_client"},
+        "iconUrl": {"type": "string", "status": "verified_from_client"},
+        "name": {"type": "string", "status": "verified_from_client"},
+        "tier": {"type": "string", "status": "verified_from_client", "allowed_or_derived_values": ["OP", "S", "A", "B", "C", "D", "F"]},
+        "shortDescription": {"type": "string", "status": "verified_from_client"},
+        "description": {"type": "string", "status": "verified_from_client"},
+        "winRate": {"type": "number", "status": "verified_from_client", "format": "percentage rendered with one decimal"},
+        "games": {"type": "number", "status": "verified_from_client"},
+        "bestChampions": {"type": "array<augmentBestChampion>", "status": "verified_from_client"},
+        "bestAugments": {"type": "array<augmentBestAugment>", "status": "verified_from_client"}
+      }
+    },
+    "augmentBestChampion": {
+      "status": "strong_inference",
+      "source": "Augments page chunk rendering code",
+      "fields": {
+        "championId": {"type": "number|string", "status": "verified_from_client"},
+        "championKey": {"type": "string", "status": "verified_from_client"},
+        "iconUrl": {"type": "string", "status": "verified_from_client"},
+        "score": {"type": "number", "status": "verified_from_client", "notes": "Client maps score to OP/S/A/B/C/D/F using thresholds 98,92,75,50,25,10."}
+      }
+    },
+    "augmentBestAugment": {
+      "status": "strong_inference",
+      "source": "Augments page chunk rendering code",
+      "fields": {
+        "augmentId": {"type": "number|string", "status": "verified_from_client"},
+        "iconUrl": {"type": "string", "status": "verified_from_client"},
+        "name": {"type": "string", "status": "verified_from_client"},
+        "score": {"type": "number", "status": "verified_from_client", "notes": "Displayed as one decimal."}
+      }
+    },
+    "arenaAugmentMetadata": {
+      "status": "verified",
+      "source": "GET https://api.your.gg/{region}/api/metadata/arena/augments",
+      "fields": {
+        "description": {"type": "string", "status": "verified"},
+        "id": {"type": "number", "status": "verified", "notes": "Observed value 0 in sample entries."},
+        "image": {"type": "string", "status": "verified", "notes": "CommunityDragon URL."},
+        "key": {"type": "string", "status": "verified"},
+        "lanes": {"type": "array<string>", "status": "verified"},
+        "name": {"type": "string", "status": "verified"},
+        "shortDescription": {"type": "string", "status": "verified"}
+      }
+    },
+    "championSearchItem": {
+      "status": "verified",
+      "source": "GET https://api.your.gg/kr/api/search/champions?region=kr&lang=en",
+      "fields": {
+        "imageUrl": {"type": "string", "status": "verified", "notes": "Data Dragon champion image URL."},
+        "key": {"type": "string", "status": "verified"},
+        "lanes": {"type": "array<string>", "status": "verified", "examples": ["Top", "Jug", "Mid", "Adc", "Sup"]},
+        "name": {"type": "string", "status": "verified"},
+        "tiers": {"type": "array<string>", "status": "verified", "examples": ["Unranked", "Iron", "Bronze", "Silver", "Gold", "Platinum", "Emerald", "Diamond", "Master", "Grandmaster", "Challenger"]}
+      }
+    },
+    "riftChartMetadata": {
+      "status": "verified",
+      "source": "GET https://api.your.gg/{region}/api/rift-chart/metadata",
+      "fields": {
+        "defaultTier": {"type": "string", "status": "verified"},
+        "defaultVersion": {"type": "string", "status": "verified"},
+        "tags": {"type": "object", "status": "verified"},
+        "tiers": {"type": "array<string>", "status": "verified"},
+        "updated": {"type": "number", "status": "verified", "notes": "Epoch milliseconds."},
+        "versions": {"type": "array<string>", "status": "verified"}
+      }
+    },
+    "playerOrSummoner": {
+      "status": "strong_inference",
+      "source": "Generated public client method names and Riot API model",
+      "likely_fields": {
+        "region": "routing/platform region such as na or kr",
+        "riotIdGameName": "Riot ID game name",
+        "riotIdTagLine": "Riot ID tag line",
+        "puuid": "Riot Account-V1 stable player UUID",
+        "summonerId": "Encrypted Summoner-V4 id",
+        "accountId": "Encrypted legacy account id where available",
+        "profileIconId": "Riot profile icon id",
+        "summonerLevel": "Riot summoner level",
+        "rankEntries": "League-V4 rank entries by queue"
+      },
+      "notes": "Route inventory includes search by Riot ID, summoners by Riot ID, profile by Riot ID, and versioned profile endpoints."
+    },
+    "match": {
+      "status": "strong_inference",
+      "source": "Generated public client method names, visible profile/match routes, and Riot Match-V5 model",
+      "likely_fields": {
+        "matchId": "regional match id",
+        "platformId": "Riot platform id",
+        "gameCreation": "timestamp",
+        "gameDuration": "duration",
+        "queueId": "queue id",
+        "gameVersion": "Riot game version",
+        "participants": "participant rows with champion, team, lane/role, KDA, items, runes, summoner spells, stats",
+        "teams": "team win/objective summary",
+        "timeline": "optional event frames if timeline endpoint collected"
+      },
+      "notes": "Public robots.txt disallows match page crawling; no match payloads were fetched."
+    },
+    "aggregateMetric": {
+      "status": "strong_inference",
+      "source": "Augment page client rendering and Riot API comparison",
+      "likely_fields": {
+        "patch": "patch bucket such as 16.13",
+        "region": "site region bucket",
+        "mode": "Aram or Arena",
+        "tierBucket": "Prismatic, Gold, Silver for augments; ranked tiers for other surfaces",
+        "championKey": "optional champion filter",
+        "augmentId": "augment identifier",
+        "games": "sample count",
+        "wins": "wins, likely hidden or derivable from winRate and games",
+        "winRate": "wins divided by games",
+        "score": "proprietary normalized score",
+        "bestChampions": "top champion associations for an augment",
+        "bestAugments": "top augment pairings"
+      },
+      "notes": "Riot does not provide these aggregates directly; they must be computed from collected matches."
+    },
+    "patch": {
+      "status": "verified_and_inferred",
+      "source": "Data Dragon versions and your.gg endpoint patch field",
+      "fields": {
+        "dataDragonVersion": {"type": "string", "status": "verified", "example": "16.13.1"},
+        "analyticsPatch": {"type": "string", "status": "verified", "example": "16.13"},
+        "publishedAt": {"type": "timestamp", "status": "inferred"},
+        "isCurrent": {"type": "boolean", "status": "inferred"}
+      }
+    },
+    "region": {
+      "status": "verified",
+      "source": "Build manifest route regex and client constants",
+      "values": ["kr", "me", "na", "br", "eune", "euw", "lan", "las", "oce", "ru", "tr", "jp", "sg", "tw", "vn"],
+      "notes": "Build manifest also has locale values default, ko, en, ja, es, vi, pt."
+    }
+  }
+}
+
