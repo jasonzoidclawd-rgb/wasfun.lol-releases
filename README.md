@@ -1,1 +1,2 @@
 # clawd
+# wasfun.lol-releases
